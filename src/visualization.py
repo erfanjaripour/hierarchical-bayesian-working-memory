@@ -6,12 +6,55 @@ import pandas as pd
 import arviz as az
 
 
+
+# Global Scientific Visualization Style
+
+
+FIG_SINGLE = (3.5, 3)
+FIG_DOUBLE = (7, 4.5)
+
+FONT_SIZE = 10
+LABEL_SIZE = 10
+TICK_SIZE = 9
+LEGEND_SIZE = 9
+LINE_WIDTH = 1.8
+MARKER_SIZE = 5
+SCATTER_SIZE = 25
+
+PLOT_MARGIN = 0.2
+
+plt.rcParams.update(
+    {
+        "font.family": "DejaVu Sans",
+        "font.size": FONT_SIZE,
+        "axes.labelsize": LABEL_SIZE,
+        "xtick.labelsize": TICK_SIZE,
+        "ytick.labelsize": TICK_SIZE,
+        "legend.fontsize": LEGEND_SIZE,
+        "figure.dpi": 300,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+	"xtick.direction": "in",
+	"ytick.direction": "in",
+	"pdf.fonttype": 42,
+	"ps.fonttype": 42,
+	"svg.fonttype": "none",
+	"savefig.transparent": False,
+    }
+)
+
+
+
+# Figure Saving
+
+
 def save_figure(
     fig: plt.Figure,
     output_dir: Path,
     filename: str,
     **kwargs,
 ) -> None:
+
     output_dir.mkdir(parents=True, exist_ok=True)
 
     fig.savefig(
@@ -24,17 +67,22 @@ def save_figure(
     fig.savefig(
         output_dir / f"{filename}.pdf",
         bbox_inches="tight",
+        transparent=False,
         **kwargs,
     )
 
     plt.close(fig)
 
 
+
+# Dataset Structure Figures
+
+
 def plot_setsize_distribution(
     summary: pd.Series,
 ) -> plt.Figure:
 
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=FIG_SINGLE)
 
     ax.bar(
         summary.index,
@@ -43,9 +91,18 @@ def plot_setsize_distribution(
 
     ax.set_xlabel("Set size")
     ax.set_ylabel("Number of trials")
-    ax.set_title("Set Size Distribution")
+
+    ax.grid(
+        axis="y",
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
 
     return fig
+
 
 
 def plot_error_distribution(
@@ -53,40 +110,47 @@ def plot_error_distribution(
     bins: int = 30,
 ) -> plt.Figure:
 
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=FIG_SINGLE)
 
     ax.hist(
         error,
         bins=bins,
+        edgecolor="white",
+        linewidth=0.3,
     )
 
     ax.set_xlabel("Error (radians)")
     ax.set_ylabel("Frequency")
-    ax.set_title("Error Distribution")
+
+    fig.set_constrained_layout(True)
 
     return fig
+
 
 
 def plot_error_density(
     error: pd.Series,
 ) -> plt.Figure:
 
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=FIG_SINGLE)
 
     error.plot.density(ax=ax)
 
     ax.set_xlabel("Error (radians)")
     ax.set_ylabel("Density")
-    ax.set_title("Error Density")
+
+    fig.set_constrained_layout(True)
 
     return fig
 
 
+
 def plot_error_distribution_by_setsize(df):
 
-    fig, ax = plt.subplots(figsize=(7,4))
+    fig, ax = plt.subplots(figsize=FIG_DOUBLE)
 
-    for size in [1,4,8]:
+    for size in [1, 4, 8]:
+
         values = df.loc[
             df["setsize"] == size,
             "errorrad"
@@ -95,16 +159,30 @@ def plot_error_distribution_by_setsize(df):
         ax.hist(
             values,
             bins=40,
-            alpha=0.5,
+            alpha=0.65,
             label=f"Set size {size}",
             density=True,
+    	    edgecolor="white",
+    	    linewidth=0.3,
         )
 
     ax.set_xlabel("Error magnitude (radians)")
     ax.set_ylabel("Density")
-    ax.legend()
+
+    ax.legend(
+        frameon=False, handlelength=2,
+    )
+
+    ax.grid(
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
 
     return fig
+
 
 
 def plot_circular_error(
@@ -113,7 +191,7 @@ def plot_circular_error(
 
     errors = df["devrad"].dropna()
 
-    fig = plt.figure(figsize=(6, 6))
+    fig = plt.figure(figsize=FIG_SINGLE)
 
     ax = fig.add_subplot(
         111,
@@ -123,51 +201,101 @@ def plot_circular_error(
     ax.hist(
         errors,
         bins=36,
+        edgecolor="white",
+        linewidth=0.3,
     )
 
+    ax.tick_params(
+        axis="both",
+        labelsize=6,
+    )
+
+    ax.set_theta_zero_location("N")
+    ax.set_theta_direction(-1)
+
+    fig.set_constrained_layout(True)
+
     return fig
+
+
+
+
+# Behavioral Results
+
 
 def plot_error_by_setsize(
     summary: pd.DataFrame,
 ) -> plt.Figure:
-    fig, ax = plt.subplots(figsize=(6, 4))
+
+    fig, ax = plt.subplots(figsize=FIG_SINGLE)
 
     ax.plot(
         summary["setsize"],
         summary["mean_error"],
         marker="o",
+        markersize=MARKER_SIZE - 1,
+        linewidth=LINE_WIDTH,
+        solid_capstyle="round",
     )
 
     ax.set_xlabel("Set size")
     ax.set_ylabel("Mean error (radians)")
-    ax.set_title("Error by Set Size")
 
-    fig.tight_layout()
+    ax.grid(
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    ax.set_xticks(np.arange(1, 9))
+
+    fig.set_constrained_layout(True)
 
     return fig
 
 
+
 def plot_participant_precision(summary):
 
-    fig, ax = plt.subplots(figsize=(8,4))
+    fig, ax = plt.subplots(figsize=FIG_DOUBLE)
 
     ax.errorbar(
         summary["id"].astype(str),
         summary["mean_error"],
         yerr=summary["std"],
         fmt="o",
+        markersize=MARKER_SIZE - 1,
+        capsize=3,
     )
 
     ax.set_xlabel("Participant")
     ax.set_ylabel("Mean error (radians)")
-    ax.tick_params(axis="x", rotation=90)
+
+    ax.tick_params(
+        axis="x",
+    )
+
+    plt.setp(
+        ax.get_xticklabels(),
+        ha="right",
+    )
+
+    ax.grid(
+        axis="y",
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
 
     return fig
 
 
+
 def plot_experiment_setsize_error(summary):
 
-    fig, ax = plt.subplots(figsize=(7,4))
+    fig, ax = plt.subplots(figsize=FIG_DOUBLE)
 
     for experiment in summary["experiment"].unique():
 
@@ -179,65 +307,183 @@ def plot_experiment_setsize_error(summary):
             subset["setsize"],
             subset["mean_error"],
             marker="o",
+            markersize=MARKER_SIZE - 1,
+            linewidth=LINE_WIDTH,
             label=experiment,
+            solid_capstyle="round",
         )
 
     ax.set_xlabel("Set size")
     ax.set_ylabel("Mean error (radians)")
-    ax.legend()
+
+    ax.legend(
+        frameon=False, handlelength=2
+    )
+
+    ax.grid(
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    ax.set_xticks(np.arange(1, 9))
+
+    fig.set_constrained_layout(True)
 
     return fig
+
+
+# Bayesian Diagnostics
 
 
 def plot_prior_predictive(
     prior_predictive,
 ) -> plt.Figure:
+
     az.plot_ppc(
         prior_predictive,
         group="prior",
     )
 
-    return plt.gcf()
+    fig = plt.gcf()
+
+    for ax in fig.axes:
+
+        legend = ax.get_legend()
+
+        if legend is not None:
+            legend.remove()
+
+        handles, labels = ax.get_legend_handles_labels()
+
+        ax.legend(
+            handles,
+            labels,
+            frameon=False,
+            fontsize=9,
+            handlelength=2,
+            handletextpad=0.8,
+        )
+
+    for ax in fig.axes:
+        ax.title.set_fontsize(10)
+        ax.xaxis.label.set_fontsize(9)
+        ax.yaxis.label.set_fontsize(9)
+        ax.tick_params(labelsize=8)
+
+    fig.set_size_inches(
+        FIG_DOUBLE
+    )
+
+    for ax in fig.axes:
+        ax.set_ylabel("Density")
+        ax.set_xlim(
+            -np.pi - PLOT_MARGIN,
+            np.pi + PLOT_MARGIN,
+        )
+
+    fig.tight_layout()
+
+    return fig
 
 
-def plot_trace(
-    idata,
-    var_names,
-) -> plt.Figure:
+
+def plot_trace(idata, var_names):
+
     az.plot_trace(
         idata,
         var_names=var_names,
         figsize=(10, 6),
     )
 
-    plt.subplots_adjust(
-        hspace=0.6,
-        wspace=0.4,
-    )
+    fig = plt.gcf()
 
-    return plt.gcf()
+    for ax in fig.axes:
+        ax.title.set_fontsize(10)
+        ax.xaxis.label.set_fontsize(9)
+        ax.yaxis.label.set_fontsize(9)
+        ax.tick_params(labelsize=8)
+
+    fig.tight_layout()
+
+    return fig
+
 
 
 def plot_posterior(
     idata,
     var_names,
 ) -> plt.Figure:
+
     az.plot_posterior(
         idata,
         var_names=var_names,
+        figsize=(12, 4),
     )
 
-    return plt.gcf()
+    fig = plt.gcf()
+
+    for ax in fig.axes:
+        ax.title.set_fontsize(10)
+        ax.xaxis.label.set_fontsize(9)
+        ax.yaxis.label.set_fontsize(9)
+        ax.tick_params(labelsize=8)
+
+    fig.tight_layout()
+
+    return fig
+
 
 
 def plot_posterior_predictive(
     posterior_predictive,
 ) -> plt.Figure:
+
     az.plot_ppc(
         posterior_predictive,
     )
 
-    return plt.gcf()
+    fig = plt.gcf()
+
+    for ax in fig.axes:
+
+        legend = ax.get_legend()
+
+        if legend is not None:
+            legend.remove()
+
+        handles, labels = ax.get_legend_handles_labels()
+
+        ax.legend(
+            handles,
+            labels,
+            frameon=False,
+            fontsize=9,
+            handlelength=2,
+            handletextpad=0.8,
+        )
+
+    for ax in fig.axes:
+        ax.title.set_fontsize(10)
+        ax.xaxis.label.set_fontsize(9)
+        ax.yaxis.label.set_fontsize(9)
+        ax.tick_params(labelsize=8)
+
+    fig.set_size_inches(
+        FIG_DOUBLE
+    )
+
+    for ax in fig.axes:
+        ax.set_ylabel("Density")
+        ax.set_xlim(
+            -np.pi - PLOT_MARGIN,
+            np.pi + PLOT_MARGIN,
+        )
+
+    fig.tight_layout()
+
+    return fig
+
 
 
 def plot_setsize_posterior_predictive(
@@ -246,13 +492,18 @@ def plot_setsize_posterior_predictive(
     predicted_mean,
     predicted_hdi,
 ) -> plt.Figure:
-    fig, ax = plt.subplots(figsize=(7, 5))
+
+    fig, ax = plt.subplots(
+        figsize=FIG_DOUBLE
+    )
 
     ax.plot(
         set_sizes,
         observed_means,
         marker="o",
-        linewidth=2,
+        markersize=MARKER_SIZE,
+        linewidth=LINE_WIDTH,
+        solid_capstyle="round",
         label="Observed",
     )
 
@@ -260,7 +511,9 @@ def plot_setsize_posterior_predictive(
         set_sizes,
         predicted_mean,
         marker="o",
-        linewidth=2,
+        markersize=MARKER_SIZE,
+        linewidth=LINE_WIDTH,
+        solid_capstyle="round",
         label="Posterior mean",
     )
 
@@ -268,38 +521,83 @@ def plot_setsize_posterior_predictive(
         set_sizes,
         predicted_hdi[:, 0],
         predicted_hdi[:, 1],
-        alpha=0.25,
+        alpha=0.35,
         label="95% HDI",
     )
 
-    ax.set_xlabel("Set Size")
-    ax.set_ylabel("Mean Error (radians)")
-    ax.legend()
+    ax.set_xlabel("Set size")
+    ax.set_ylabel("Mean error (radians)")
+
+    ax.legend(
+        frameon=False, handlelength=2
+    )
+
+    ax.grid(
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    ax.set_xticks(np.arange(1, 9))
+
+    fig.set_constrained_layout(True)
 
     return fig
+
 
 
 def plot_rank(
     idata,
     var_names,
 ) -> plt.Figure:
+
     az.plot_rank(
         idata,
         var_names=var_names,
+        figsize=(12, 10),
+        kind="bars",
     )
 
-    return plt.gcf()
+    fig = plt.gcf()
+
+    for ax in fig.axes:
+        ax.title.set_fontsize(10)
+        ax.xaxis.label.set_fontsize(9)
+        ax.yaxis.label.set_fontsize(9)
+        ax.tick_params(labelsize=8)
+
+    for ax in fig.axes:
+        title = ax.get_title()
+        ax.set_title(title.replace("\n", " "), fontsize=10)
+
+    fig.subplots_adjust(
+        left=0.12,
+        right=0.98,
+        top=0.98,
+        bottom=0.05,
+        hspace=0.9,
+        wspace=0.4,
+    )
+
+    return fig
+
+
+# Model Validation
 
 
 def plot_participant_ppc(
     observed,
     predicted,
 ) -> plt.Figure:
-    fig, ax = plt.subplots(figsize=(7, 5))
+
+    fig, ax = plt.subplots(
+        figsize=FIG_SINGLE
+    )
 
     ax.scatter(
         observed,
         predicted,
+        s=SCATTER_SIZE,
     )
 
     lims = [
@@ -310,25 +608,44 @@ def plot_participant_ppc(
     ax.plot(
         lims,
         lims,
-        "--",
+        linestyle="--",
+        solid_capstyle="round",
     )
 
-    ax.set_xlabel("Observed Mean Error")
-    ax.set_ylabel("Predicted Mean Error")
+    ax.set_xlabel(
+        "Observed mean error"
+    )
+
+    ax.set_ylabel(
+        "Predicted mean error"
+    )
+
+    ax.grid(
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
 
     return fig
+
 
 
 def plot_residuals(
     setsize,
     residuals,
 ) -> plt.Figure:
-    fig, ax = plt.subplots(figsize=(7, 5))
+
+    fig, ax = plt.subplots(
+        figsize=FIG_SINGLE
+    )
 
     ax.scatter(
         setsize,
         residuals,
-        alpha=0.2,
+        alpha=0.35,
+        s=15,
     )
 
     ax.axhline(
@@ -336,43 +653,59 @@ def plot_residuals(
         linestyle="--",
     )
 
-    ax.set_xlabel("Set Size")
-    ax.set_ylabel("Observed − Predicted")
+    ax.set_xlabel(
+        "Set size"
+    )
+
+    ax.set_ylabel(
+        "Observed − Predicted"
+    )
+
+    ax.grid(
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
 
     return fig
+
+
+
+
+# Robustness Analysis
 
 
 def plot_participant_influence(
     participant_influence,
 ):
-    """
-    Plot participant-level influence diagnostics.
 
-    Parameters
-    ----------
-    participant_influence : pandas.DataFrame
-        Must contain:
-        - participant
-        - mean_error
-        - uncertainty (optional)
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-    """
-
-    import matplotlib.pyplot as plt
-
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig, ax = plt.subplots(
+        figsize=FIG_DOUBLE
+    )
 
     ax.scatter(
         participant_influence["participant"],
         participant_influence["mean_error"],
+        s=SCATTER_SIZE,
     )
 
-    ax.set_xlabel("Participant")
-    ax.set_ylabel("Mean Error")
-    ax.set_title("Participant Influence Diagnostics")
+    ax.set_xlabel(
+        "Participant"
+    )
+
+    ax.set_ylabel(
+        "Mean error (radians)"
+    )
+
+    ax.grid(
+        alpha=0.35,
+	linestyle="--",
+	linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
 
     return fig
 
@@ -381,49 +714,65 @@ def plot_participant_influence(
 def plot_posterior_stability(
     stability_results,
 ):
-    """
-    Plot posterior stability across independent sampling runs.
 
-    Parameters
-    ----------
-    stability_results : pandas.DataFrame
-        Must contain:
-        - parameter
-        - mean
-        - hdi_3%
-        - hdi_97%
-        - seed
+    fig, ax = plt.subplots(
+        figsize=FIG_DOUBLE
+    )
 
-    Returns
-    -------
-    matplotlib.figure.Figure
-    """
+    parameters = stability_results["parameter"].unique()
+    x = np.arange(len(parameters))
 
-    import matplotlib.pyplot as plt
+    offsets = {
+        42: -0.15,
+        123: 0.00,
+        456: 0.15,
+    }
 
-    fig, ax = plt.subplots(figsize=(8, 5))
+    for seed in stability_results["seed"].unique():
 
-    seeds = stability_results["seed"].unique()
-
-    for seed in seeds:
-
-        subset = stability_results[
-            stability_results["seed"] == seed
-        ]
+        subset = (
+            stability_results[
+                stability_results["seed"] == seed
+            ]
+            .set_index("parameter")
+            .loc[parameters]
+            .reset_index()
+        )
 
         ax.errorbar(
-            subset["parameter"],
+            x + offsets.get(seed, 0.0),
             subset["mean"],
             yerr=[
                 subset["mean"] - subset["hdi_3%"],
                 subset["hdi_97%"] - subset["mean"],
             ],
             fmt="o",
+            markersize=MARKER_SIZE,
+            capsize=3,
+            linewidth=1.5,
             label=f"Seed {seed}",
         )
 
-    ax.set_ylabel("Posterior Estimate")
-    ax.set_title("Posterior Stability Across Seeds")
-    ax.legend()
+    ax.set_xticks(x)
+    ax.set_xticklabels(
+        parameters,
+    )
+
+    ax.set_xlabel("Parameter")
+    ax.set_ylabel("Posterior estimate")
+
+    ax.legend(
+        frameon=False,
+        handlelength=2,
+    )
+
+    ax.grid(
+        axis="y",
+        alpha=0.35,
+        linestyle="--",
+        linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
 
     return fig
