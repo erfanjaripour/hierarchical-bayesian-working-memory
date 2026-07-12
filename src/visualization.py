@@ -340,3 +340,90 @@ def plot_residuals(
     ax.set_ylabel("Observed − Predicted")
 
     return fig
+
+
+def plot_participant_influence(
+    participant_influence,
+):
+    """
+    Plot participant-level influence diagnostics.
+
+    Parameters
+    ----------
+    participant_influence : pandas.DataFrame
+        Must contain:
+        - participant
+        - mean_error
+        - uncertainty (optional)
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    ax.scatter(
+        participant_influence["participant"],
+        participant_influence["mean_error"],
+    )
+
+    ax.set_xlabel("Participant")
+    ax.set_ylabel("Mean Error")
+    ax.set_title("Participant Influence Diagnostics")
+
+    return fig
+
+
+
+def plot_posterior_stability(
+    stability_results,
+):
+    """
+    Plot posterior stability across independent sampling runs.
+
+    Parameters
+    ----------
+    stability_results : pandas.DataFrame
+        Must contain:
+        - parameter
+        - mean
+        - hdi_3%
+        - hdi_97%
+        - seed
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    seeds = stability_results["seed"].unique()
+
+    for seed in seeds:
+
+        subset = stability_results[
+            stability_results["seed"] == seed
+        ]
+
+        ax.errorbar(
+            subset["parameter"],
+            subset["mean"],
+            yerr=[
+                subset["mean"] - subset["hdi_3%"],
+                subset["hdi_97%"] - subset["mean"],
+            ],
+            fmt="o",
+            label=f"Seed {seed}",
+        )
+
+    ax.set_ylabel("Posterior Estimate")
+    ax.set_title("Posterior Stability Across Seeds")
+    ax.legend()
+
+    return fig

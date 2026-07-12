@@ -47,6 +47,9 @@ def build_hierarchical_model(
     setsize,
     participant_idx,
     n_participants,
+    alpha_sd=2.0,
+    beta_sd=1.0,
+    sigma_alpha_sd=1.0,
 ):
 
     setsize = np.asarray(setsize, dtype=float)
@@ -57,18 +60,18 @@ def build_hierarchical_model(
         alpha = pm.Normal(
             "alpha",
             mu=0.0,
-            sigma=2.0,
+            sigma=alpha_sd,
         )
 
         beta = pm.Normal(
             "beta",
             mu=0.0,
-            sigma=1.0,
+            sigma=beta_sd,
         )
 
         sigma_alpha = pm.HalfNormal(
             "sigma_alpha",
-            sigma=1.0,
+            sigma=sigma_alpha_sd,
         )
 
         alpha_participant = pm.Normal(
