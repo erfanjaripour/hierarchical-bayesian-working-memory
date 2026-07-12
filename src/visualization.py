@@ -3,12 +3,14 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import arviz as az
 
 
 def save_figure(
     fig: plt.Figure,
     output_dir: Path,
     filename: str,
+    **kwargs,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -16,11 +18,13 @@ def save_figure(
         output_dir / f"{filename}.png",
         dpi=300,
         bbox_inches="tight",
+        **kwargs,
     )
 
     fig.savefig(
         output_dir / f"{filename}.pdf",
         bbox_inches="tight",
+        **kwargs,
     )
 
     plt.close(fig)
@@ -106,7 +110,8 @@ def plot_error_distribution_by_setsize(df):
 def plot_circular_error(
     df: pd.DataFrame,
 ) -> plt.Figure:
-    errors = df["errorrad"].dropna()
+
+    errors = df["devrad"].dropna()
 
     fig = plt.figure(figsize=(6, 6))
 
@@ -120,12 +125,7 @@ def plot_circular_error(
         bins=36,
     )
 
-    ax.set_title("Circular Error Distribution")
-
-    fig.tight_layout()
-
     return fig
-
 
 def plot_error_by_setsize(
     summary: pd.DataFrame,
@@ -185,5 +185,158 @@ def plot_experiment_setsize_error(summary):
     ax.set_xlabel("Set size")
     ax.set_ylabel("Mean error (radians)")
     ax.legend()
+
+    return fig
+
+
+def plot_prior_predictive(
+    prior_predictive,
+) -> plt.Figure:
+    az.plot_ppc(
+        prior_predictive,
+        group="prior",
+    )
+
+    return plt.gcf()
+
+
+def plot_trace(
+    idata,
+    var_names,
+) -> plt.Figure:
+    az.plot_trace(
+        idata,
+        var_names=var_names,
+        figsize=(10, 6),
+    )
+
+    plt.subplots_adjust(
+        hspace=0.6,
+        wspace=0.4,
+    )
+
+    return plt.gcf()
+
+
+def plot_posterior(
+    idata,
+    var_names,
+) -> plt.Figure:
+    az.plot_posterior(
+        idata,
+        var_names=var_names,
+    )
+
+    return plt.gcf()
+
+
+def plot_posterior_predictive(
+    posterior_predictive,
+) -> plt.Figure:
+    az.plot_ppc(
+        posterior_predictive,
+    )
+
+    return plt.gcf()
+
+
+def plot_setsize_posterior_predictive(
+    set_sizes,
+    observed_means,
+    predicted_mean,
+    predicted_hdi,
+) -> plt.Figure:
+    fig, ax = plt.subplots(figsize=(7, 5))
+
+    ax.plot(
+        set_sizes,
+        observed_means,
+        marker="o",
+        linewidth=2,
+        label="Observed",
+    )
+
+    ax.plot(
+        set_sizes,
+        predicted_mean,
+        marker="o",
+        linewidth=2,
+        label="Posterior mean",
+    )
+
+    ax.fill_between(
+        set_sizes,
+        predicted_hdi[:, 0],
+        predicted_hdi[:, 1],
+        alpha=0.25,
+        label="95% HDI",
+    )
+
+    ax.set_xlabel("Set Size")
+    ax.set_ylabel("Mean Error (radians)")
+    ax.legend()
+
+    return fig
+
+
+def plot_rank(
+    idata,
+    var_names,
+) -> plt.Figure:
+    az.plot_rank(
+        idata,
+        var_names=var_names,
+    )
+
+    return plt.gcf()
+
+
+def plot_participant_ppc(
+    observed,
+    predicted,
+) -> plt.Figure:
+    fig, ax = plt.subplots(figsize=(7, 5))
+
+    ax.scatter(
+        observed,
+        predicted,
+    )
+
+    lims = [
+        min(observed + predicted),
+        max(observed + predicted),
+    ]
+
+    ax.plot(
+        lims,
+        lims,
+        "--",
+    )
+
+    ax.set_xlabel("Observed Mean Error")
+    ax.set_ylabel("Predicted Mean Error")
+
+    return fig
+
+
+def plot_residuals(
+    setsize,
+    residuals,
+) -> plt.Figure:
+    fig, ax = plt.subplots(figsize=(7, 5))
+
+    ax.scatter(
+        setsize,
+        residuals,
+        alpha=0.2,
+    )
+
+    ax.axhline(
+        0,
+        linestyle="--",
+    )
+
+    ax.set_xlabel("Set Size")
+    ax.set_ylabel("Observed − Predicted")
 
     return fig
