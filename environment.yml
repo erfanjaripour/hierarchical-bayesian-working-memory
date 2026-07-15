@@ -13,4 +13,6 @@ dependencies:
   - jupyterlab
   - pymc
   - arviz
+  - nutpie
+  - numpyro
   - pip

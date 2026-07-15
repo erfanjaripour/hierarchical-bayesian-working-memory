@@ -1,240 +1,201 @@
-\# Stroop Interference: A Behavioral and Computational Analysis
+# A Hierarchical Bayesian Analysis of Memory Load Effects on Visual Working Memory Precision
 
+## Overview
 
+This project investigates how memory load influences visual working memory precision using trial-level data from a continuous-report task. The analysis examines whether increasing set size is associated with reduced memory precision and whether individual differences in precision can be captured using hierarchical Bayesian models.
 
-\## Overview
+The project applies Bayesian modeling to a publicly available visual working memory dataset originally reported by van den Berg et al. (2012). Three progressively flexible Bayesian models are evaluated: a null model, a hierarchical model with participant-level variability, and a nonlinear hierarchical model with set-size-specific effects.
 
+The results show that memory load is associated with systematic changes in precision and that the nonlinear hierarchical model provides the best predictive performance among the tested model formulations. Robustness analyses indicate that the main conclusions remain stable across alternative priors, sampling configurations, and initialization settings.
 
+## Research Question
 
-This project investigates cognitive interference in the Stroop task using trial-level behavioral data from 81 participants. The analysis examines how congruent, neutral, and incongruent conditions affect reaction time and accuracy, with particular focus on the Stroop effect defined as the reaction time difference between incongruent and congruent trials.
+How does memory load affect visual working memory precision, and can hierarchical Bayesian models adequately characterize individual differences and set-size effects in continuous-report performance?
 
+## Hypotheses
 
+H1: Memory precision will decrease as memory load increases.
 
-The results show a strong interference effect, with slower responses in incongruent trials and faster responses in congruent trials. The project also includes participant-level analyses, robustness checks, and a simple computational model that reproduces the main behavioral pattern.
+H2: Participants will show meaningful individual differences in baseline visual working memory precision.
 
+H3: A more flexible hierarchical Bayesian model will provide better predictive performance than simpler alternative formulations.
 
+# Dataset
 
-\## Research Question
+## Dataset Source
 
+The dataset analyzed in this project is the Visual Working Memory Continuous Report Dataset from van den Berg et al. (2012).
 
+Original citation:
 
-How does cognitive interference influence reaction time and accuracy during Stroop task performance, and to what extent can a simple computational model reproduce the observed interference pattern?
+van den Berg, R., Shin, H., Chou, W. C., George, R., Ma, W. J., & Jehee, J. F. M. (2012). Variability in encoding precision accounts for visual short-term memory limitations. *Proceedings of the National Academy of Sciences, 109*(22), 8780–8785.
 
+The dataset is publicly available through the BenchmarksWM R package:
 
+https://github.com/joschadutli/BenchmarksWM
 
-\# Hypotheses
+The original dataset identifier is:
 
-H1: Participants will show longer reaction times in incongruent trials than in congruent trials.
+`vandenberg12`
 
-H2: Participants will show lower accuracy in incongruent trials than in congruent trials.
+The dataset contains trial-level continuous-report responses from three experiments investigating visual working memory precision.
 
+Experiments include:
 
+- Exp1: Color memory with scrolling response
+- Exp2: Orientation memory with rotation response
+- ExpS3: Color memory with color wheel response
 
+The repository uses the original dataset without modifying the experimental structure. All preprocessing steps are documented in the analysis workflow.
 
+# Methods Summary
 
-\## Dataset Source
+## Experimental Paradigm
 
+The project analyzes continuous-report visual working memory tasks in which participants remember visual features under different memory loads and reproduce the target feature after a delay.
 
+Memory performance is quantified using circular error, calculated as the angular difference between the target stimulus and participant response.
 
-The dataset used in this project is publicly available through the Open Science Framework and contains behavioral recordings from a Stroop task experiment. It includes trial-level reaction time and accuracy data collected across congruent, neutral, and incongruent conditions.
+## Data Processing
 
+Preprocessing includes:
 
+- validation of dataset structure,
+- handling missing values,
+- circular error transformations,
+- participant and experiment indexing,
+- generation of analysis-ready datasets.
 
-The data can be accessed at: OSF project page
+All preprocessing and analysis steps are implemented in Python.
 
+## Bayesian Modeling
 
+The analysis uses hierarchical Bayesian models with a Von Mises likelihood for circular error distributions.
 
-This repository uses the openly shared dataset without modification of its original experimental structure, aside from preprocessing steps described in the Methods section.
+Three models are evaluated:
 
+1. **Null model**
 
+A baseline model estimating participant-independent precision.
 
-\## Methods Summary
+2. **Hierarchical model**
 
+A model estimating:
 
+- population-level precision,
+- memory-load effects,
+- participant-level variation through partial pooling.
 
-This project analyzes behavioral data from a Stroop task experiment to study cognitive interference within responses. The dataset contains reaction time and accuracy measurements collected in congruent, incongruent, and neutral conditions.
+3. **Nonlinear hierarchical model**
 
+A more flexible model allowing memory-load effects to vary across set sizes using a sum-to-zero parameterization.
 
+Models are fitted using Hamiltonian Monte Carlo sampling with the No-U-Turn Sampler (NUTS) implemented in PyMC.
 
-Data preprocessing included removing probe trials, excluding nan values or extreme reaction times, and resolving participant-session identifiers. After preprocessing, participant-level summary measures were computed for each condition.
+Model evaluation includes:
 
+- posterior predictive checks,
+- convergence diagnostics,
+- effective sample size,
+- rank plots,
+- leave-one-out cross-validation.
 
+Robustness analyses examine:
 
-The primary analysis examined the Stroop effect, defined as the difference in mean reaction time between incongruent and congruent trials. Descriptive statistics, paired-samples comparisons, effect size estimation, and confidence intervals were used to quantify interference effects. Additional robustness analyses and nonparametric tests were conducted to verify the stability of the findings. A simple computational simulation was also added to evaluate whether a baseline-plus-interference model could reproduce the observed behavioral patterns.
+- prior sensitivity,
+- sampling sensitivity,
+- posterior stability,
+- participant influence.
 
+# Results Summary
 
+The analysis demonstrates a systematic relationship between memory load and visual working memory precision.
 
-\## Key Results
+The hierarchical Bayesian models identified substantial individual differences in baseline precision across participants.
 
+Model comparison using leave-one-out cross-validation favored the nonlinear hierarchical model over simpler alternatives, indicating that a more flexible set-size representation provided better predictive performance within the tested model family.
 
+Posterior predictive checks showed that the selected model reproduced important characteristics of the observed error distributions.
 
-The analysis included data from 81 participants who did the Stroop task in congruent, neutral, and incongruent conditions.
+Robustness analyses showed highly similar parameter estimates across alternative priors, sampling configurations, and random seeds.
 
+# Reproducibility
 
+This project is fully reproducible using a Python scientific computing environment.
 
-Reaction times followed the expected Stroop pattern. The fastest responses were in the congruent condition, and the slowest ones in the incongruent condition. It showed a clear cognitive interference.
+The complete workflow includes:
 
+1. Data preparation
+2. Exploratory analysis
+3. Bayesian model fitting
+4. Posterior analysis
+5. Model comparison
+6. Figure and table generation
 
+Detailed computational environment information, including software versions and dependencies, is provided in the repository environment files.
 
-The average Stroop effect was 0.106 seconds. It showed a significant increase in response time when the stimulus's meaning conflicted with the required response.
+To reproduce the analysis:
 
+1. Clone this repository.
+2. Install the required Python environment.
+3. Download and place the dataset in the appropriate data directory.
+4. Execute the analysis scripts/notebooks in the documented order.
 
+All generated figures, tables, and supplementary outputs can be reproduced from the analysis pipeline.
 
-Paired-samples t-test showed a significant interference effect with t(80) = 17.77 and p = 1.67 × 10⁻²⁹.
+# Repository Structure
 
+working-memory-bayesian-model/  
+│  
+├── data/  
+│   ├── processed/  
+│   ├── raw/  
+│  
+│  
+├── manuscript/  
+│   ├── paper-draft.md  
+│   ├── references.bib  
+│  
+│  
+├── notebooks/  
+│   ├── 01-data-inspection.ipynb  
+│   ├── 02-analysis.ipynb  
+│   ├── 03-modeling.ipynb  
+│  
+├── results/  
+│   ├── figures/  
+│   ├── tables/  
+│  
+│  
+├── src/  
+│   ├── \_\_init\_\_.py  
+│   ├── circular\_statistics.py  
+│   ├── data\_processing.py  
+│   ├── models.py  
+│   ├── visualization.py  
+│  
+│  
+├── .gitignore 
+├── CITATION.cff  
+├── environment.yml  
+├── LICENSE  
+└── README.md  
 
+# Citation
 
-The effect size was large (dz = 1.97). It showed a strong and reliable interference across participants.
+If you use this repository, please cite the associated preprint:
 
+[Preprint citation will be added after publication.]
 
+The original dataset should also be cited:
 
-Accuracy remained high across conditions, providing little evidence of a balance between response speed and accuracy.
+van den Berg, R., Shin, H., Chou, W. C., George, R., Ma, W. J., & Jehee, J. F. M. (2012). Variability in encoding precision accounts for visual short-term memory limitations. *Proceedings of the National Academy of Sciences, 109*(22), 8780–8785.
 
+# License
 
+This repository contains original analysis code and materials developed for this project.
 
-Robustness checks supported the validity of the statistical analyses, with no substantial deviations from normality detected.
+The original dataset is distributed according to the license specified by the BenchmarksWM repository.
 
-
-
-A simple additive model of interference reproduces the observed condition-level reaction time structure. It suggested that an additive interference mechanism can account for the main behavioral effects observed in the dataset.
-
-
-
-\## Figure Preview
-
-
-
-Figure 1 — Mean RT by Condition
-
-Mean reaction times for congruent, incongruent, and neutral trials.
-
-
-
-Figure 2 — RT Distribution by Condition
-
-Participant-level reaction time distributions across experimental conditions.
-
-
-
-Figure 3 — Stroop Effect Distribution
-
-Distribution of participant-specific Stroop interference effects (incongruent − congruent RT).
-
-
-
-Figure 4 — Baseline RT vs. Stroop Effect
-
-Relationship between baseline processing speed and interference magnitude.
-
-
-
-Figure 5 — Model vs. Data Comparison
-
-Comparison of observed and simulated reaction time distributions.
-
-
-
-\## Reproducibility
-
-
-
-This project is fully reproducible under a standard Python scientific computing environment. The analysis pipeline is implemented through three Jupyter notebooks, each executed sequentially from top to bottom: an exploratory analysis notebook, a statistical analysis notebook, and a computational modeling notebook. Each notebook runs in a few seconds and produces both intermediate and final outputs.
-
-
-
-All raw data must be manually placed in the data/raw/ directory prior to execution. The notebooks read directly from this location using local file paths. No external API calls or automatic downloads are required.
-
-
-
-The workflow is deterministic. All statistical procedures and the simulation model use fixed computational procedures, ensuring identical outputs across runs. Each notebook generates and saves both figures and CSV output files, which are stored within the repository structure for downstream analysis and visualization.
-
-
-
-\## Repository Structure
-
-
-
-stroop-interference/
-
-│
-
-├── data/
-
-│   ├── metadata/
-
-│   ├── processed/
-
-│   ├── raw/
-
-│
-
-│
-
-├── figures/
-
-│   ├──
-
-│   ├── baseline-vs-effect.pdf
-
-│   ├── baseline-vs-effect.png
-
-│   ├── distribution-stroop-effects.pdf
-
-│   ├── distribution-stroop-effects.png
-
-│   ├── model-vs-data.pdf
-
-│   ├── model-vs-data.png
-
-│   ├── rt-by-condition.pdf
-
-│   ├── rt-by-condition.png
-
-│
-
-├── manuscript/
-
-│   ├── paper-draft.md
-
-│
-
-│
-
-├── notebooks/
-
-│   ├── 01-exploration.ipynb
-
-│   ├── 02-analysis.ipynb
-
-│   ├── 03-modeling.ipynb
-
-│
-
-│
-
-├── results/
-
-│   ├── assumption-checks.json
-
-│   ├── descriptives.csv
-
-│   ├── inferential-results.csv
-
-│   ├── participant-qc.csv
-
-│   ├── simulated-data.csv
-
-│   ├── stroop-summary.json
-
-│   ├── subject-level-stroop-effects.csv
-
-│
-
-│
-
-├── .gitignore
-
-├── README.md
-
-└── requirements.txt
+Code and manuscript materials are released under the repository license specified below.
 
