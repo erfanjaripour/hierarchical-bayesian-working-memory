@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+title: "A Hierarchical Bayesian Analysis of Memory Load Effects on Visual Working Memory Precision"
+
+authors:
+  - family-names: "Jaripour"
+    given-names: "Erfan"
+
+version: "1.0.0"
+
+repository-code: "https://github.com/your-username/working-memory-bayesian-model"
+
+license: "MIT"
+
+date-released: "2026-07-15"
