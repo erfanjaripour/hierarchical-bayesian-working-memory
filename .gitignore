@@ -6,3 +6,5 @@ notebooks/start-jupyter.bat
 
 __pycache__/
 *.py[cod]
+
+preprint-latex
