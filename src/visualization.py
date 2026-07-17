@@ -10,16 +10,19 @@ import arviz as az
 # Global Scientific Visualization Style
 
 
-FIG_SINGLE = (3.5, 3)
-FIG_DOUBLE = (7, 4.5)
+FIG_SINGLE = (3.35, 2.8)
+FIG_DOUBLE = (6.9, 4.0)
+FIG_DIAGNOSTIC = (8.5, 6.5)
 
-FONT_SIZE = 10
+FONT_SIZE = 9
+TITLE_SIZE = 10
 LABEL_SIZE = 10
 TICK_SIZE = 9
 LEGEND_SIZE = 9
 LINE_WIDTH = 1.8
-MARKER_SIZE = 5
-SCATTER_SIZE = 25
+
+LINE_MARKER = 4
+SCATTER_SIZE = 18
 
 PLOT_MARGIN = 0.2
 
@@ -170,7 +173,8 @@ def plot_error_distribution_by_setsize(df):
     ax.set_ylabel("Density")
 
     ax.legend(
-        frameon=False, handlelength=2,
+        frameon=False,
+	handlelength=1.8,
     )
 
     ax.grid(
@@ -233,7 +237,7 @@ def plot_error_by_setsize(
         summary["setsize"],
         summary["mean_error"],
         marker="o",
-        markersize=MARKER_SIZE - 1,
+        markersize=LINE_MARKER,
         linewidth=LINE_WIDTH,
         solid_capstyle="round",
     )
@@ -264,7 +268,7 @@ def plot_participant_precision(summary):
         summary["mean_error"],
         yerr=summary["std"],
         fmt="o",
-        markersize=MARKER_SIZE - 1,
+        markersize=LINE_MARKER,
         capsize=3,
     )
 
@@ -307,7 +311,7 @@ def plot_experiment_setsize_error(summary):
             subset["setsize"],
             subset["mean_error"],
             marker="o",
-            markersize=MARKER_SIZE - 1,
+            markersize=LINE_MARKER,
             linewidth=LINE_WIDTH,
             label=experiment,
             solid_capstyle="round",
@@ -317,7 +321,8 @@ def plot_experiment_setsize_error(summary):
     ax.set_ylabel("Mean error (radians)")
 
     ax.legend(
-        frameon=False, handlelength=2
+        frameon=False,
+	handlelength=1.8
     )
 
     ax.grid(
@@ -346,6 +351,7 @@ def plot_prior_predictive(
     )
 
     fig = plt.gcf()
+    fig.set_size_inches(FIG_DOUBLE)
 
     for ax in fig.axes:
 
@@ -360,29 +366,24 @@ def plot_prior_predictive(
             handles,
             labels,
             frameon=False,
-            fontsize=9,
-            handlelength=2,
+            fontsize=LEGEND_SIZE,
+            handlelength=1.8,
             handletextpad=0.8,
         )
 
-    for ax in fig.axes:
-        ax.title.set_fontsize(10)
-        ax.xaxis.label.set_fontsize(9)
-        ax.yaxis.label.set_fontsize(9)
-        ax.tick_params(labelsize=8)
-
-    fig.set_size_inches(
-        FIG_DOUBLE
-    )
-
-    for ax in fig.axes:
+        ax.set_title("")
+        ax.set_xlabel("Error (radians)")
         ax.set_ylabel("Density")
-        ax.set_xlim(
-            -np.pi - PLOT_MARGIN,
-            np.pi + PLOT_MARGIN,
+
+        ax.tick_params(labelsize=TICK_SIZE)
+
+        ax.grid(
+            alpha=0.35,
+            linestyle="--",
+            linewidth=0.5,
         )
 
-    fig.tight_layout()
+    fig.tight_layout(pad=0.5)
 
     return fig
 
@@ -393,18 +394,21 @@ def plot_trace(idata, var_names):
     az.plot_trace(
         idata,
         var_names=var_names,
-        figsize=(10, 6),
+        figsize=FIG_DIAGNOSTIC,
     )
 
     fig = plt.gcf()
 
-    for ax in fig.axes:
-        ax.title.set_fontsize(10)
-        ax.xaxis.label.set_fontsize(9)
-        ax.yaxis.label.set_fontsize(9)
-        ax.tick_params(labelsize=8)
+    fig = plt.gcf()
 
-    fig.tight_layout()
+    for ax in fig.axes:
+        ax.set_title(ax.get_title(), fontsize=TITLE_SIZE)
+        ax.xaxis.label.set_fontsize(LABEL_SIZE)
+        ax.yaxis.label.set_fontsize(LABEL_SIZE)
+        ax.tick_params(labelsize=TICK_SIZE)
+
+    fig.tight_layout(pad=0.5)
+    fig.subplots_adjust(hspace=0.6, wspace=0.3)
 
     return fig
 
@@ -418,69 +422,53 @@ def plot_posterior(
     az.plot_posterior(
         idata,
         var_names=var_names,
-        figsize=(12, 4),
+        figsize=FIG_DOUBLE,
     )
 
     fig = plt.gcf()
 
     for ax in fig.axes:
-        ax.title.set_fontsize(10)
-        ax.xaxis.label.set_fontsize(9)
-        ax.yaxis.label.set_fontsize(9)
-        ax.tick_params(labelsize=8)
+        ax.set_title(ax.get_title(), fontsize=TITLE_SIZE)
+        ax.xaxis.label.set_fontsize(LABEL_SIZE)
+        ax.yaxis.label.set_fontsize(LABEL_SIZE)
+        ax.tick_params(labelsize=TICK_SIZE)
 
-    fig.tight_layout()
+    fig.tight_layout(pad=0.5)
 
     return fig
-
 
 
 def plot_posterior_predictive(
     posterior_predictive,
 ) -> plt.Figure:
 
-    az.plot_ppc(
-        posterior_predictive,
-    )
+    az.plot_ppc(posterior_predictive)
 
     fig = plt.gcf()
+    fig.set_size_inches(FIG_DOUBLE)
 
     for ax in fig.axes:
+        ax.set_title("")
+        ax.set_xlabel("Error (radians)")
+        ax.set_ylabel("Density")
 
-        legend = ax.get_legend()
+        ax.tick_params(labelsize=TICK_SIZE)
+        ax.xaxis.label.set_size(LABEL_SIZE)
+        ax.yaxis.label.set_size(LABEL_SIZE)
 
-        if legend is not None:
-            legend.remove()
-
-        handles, labels = ax.get_legend_handles_labels()
+        ax.grid(
+            alpha=0.35,
+            linestyle="--",
+            linewidth=0.5,
+        )
 
         ax.legend(
-            handles,
-            labels,
             frameon=False,
-            fontsize=9,
-            handlelength=2,
-            handletextpad=0.8,
+            fontsize=LEGEND_SIZE,
+            handlelength=1.8,
         )
 
-    for ax in fig.axes:
-        ax.title.set_fontsize(10)
-        ax.xaxis.label.set_fontsize(9)
-        ax.yaxis.label.set_fontsize(9)
-        ax.tick_params(labelsize=8)
-
-    fig.set_size_inches(
-        FIG_DOUBLE
-    )
-
-    for ax in fig.axes:
-        ax.set_ylabel("Density")
-        ax.set_xlim(
-            -np.pi - PLOT_MARGIN,
-            np.pi + PLOT_MARGIN,
-        )
-
-    fig.tight_layout()
+    fig.tight_layout(pad=0.5)
 
     return fig
 
@@ -501,7 +489,7 @@ def plot_setsize_posterior_predictive(
         set_sizes,
         observed_means,
         marker="o",
-        markersize=MARKER_SIZE,
+        markersize=LINE_MARKER,
         linewidth=LINE_WIDTH,
         solid_capstyle="round",
         label="Observed",
@@ -511,7 +499,7 @@ def plot_setsize_posterior_predictive(
         set_sizes,
         predicted_mean,
         marker="o",
-        markersize=MARKER_SIZE,
+        markersize=LINE_MARKER,
         linewidth=LINE_WIDTH,
         solid_capstyle="round",
         label="Posterior mean",
@@ -529,7 +517,8 @@ def plot_setsize_posterior_predictive(
     ax.set_ylabel("Mean error (radians)")
 
     ax.legend(
-        frameon=False, handlelength=2
+        frameon=False,
+	handlelength=1.8
     )
 
     ax.grid(
@@ -554,30 +543,20 @@ def plot_rank(
     az.plot_rank(
         idata,
         var_names=var_names,
-        figsize=(12, 10),
+        figsize=FIG_DIAGNOSTIC,
         kind="bars",
     )
 
     fig = plt.gcf()
 
     for ax in fig.axes:
-        ax.title.set_fontsize(10)
-        ax.xaxis.label.set_fontsize(9)
-        ax.yaxis.label.set_fontsize(9)
-        ax.tick_params(labelsize=8)
+        ax.set_title(ax.get_title().replace("\n", " "), fontsize=TITLE_SIZE)
+        ax.xaxis.label.set_fontsize(LABEL_SIZE)
+        ax.yaxis.label.set_fontsize(LABEL_SIZE)
+        ax.tick_params(labelsize=TICK_SIZE)
 
-    for ax in fig.axes:
-        title = ax.get_title()
-        ax.set_title(title.replace("\n", " "), fontsize=10)
-
-    fig.subplots_adjust(
-        left=0.12,
-        right=0.98,
-        top=0.98,
-        bottom=0.05,
-        hspace=0.9,
-        wspace=0.4,
-    )
+    fig.tight_layout(pad=0.5)
+    fig.subplots_adjust(hspace=0.8, wspace=0.4)
 
     return fig
 
@@ -747,7 +726,7 @@ def plot_posterior_stability(
                 subset["hdi_97%"] - subset["mean"],
             ],
             fmt="o",
-            markersize=MARKER_SIZE,
+            markersize=LINE_MARKER,
             capsize=3,
             linewidth=1.5,
             label=f"Seed {seed}",
@@ -763,7 +742,7 @@ def plot_posterior_stability(
 
     ax.legend(
         frameon=False,
-        handlelength=2,
+        handlelength=1.8,
     )
 
     ax.grid(
