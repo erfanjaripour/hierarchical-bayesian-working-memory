@@ -1,0 +1,4 @@
+model,max_pareto_k,n_pareto_k_gt_0.7,n_pareto_k_gt_1.0
+Null,0.19917451859493998,0,0
+Hierarchical,0.18504203590709692,0,0
+Nonlinear,0.26413167095137763,0,0
