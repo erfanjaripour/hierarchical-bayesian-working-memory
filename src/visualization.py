@@ -439,39 +439,50 @@ def plot_posterior(
 
 
 def plot_posterior_predictive(
-    posterior_predictive,
+    observed_error,
+    posterior_error,
 ) -> plt.Figure:
 
-    az.plot_ppc(posterior_predictive)
+    fig, ax = plt.subplots(figsize=FIG_DOUBLE)
 
-    fig = plt.gcf()
-    fig.set_size_inches(FIG_DOUBLE)
+    ax.hist(
+        observed_error,
+        bins=40,
+        density=True,
+        alpha=0.45,
+        label="Observed",
+    )
 
-    for ax in fig.axes:
-        ax.set_title("")
-        ax.set_xlabel("Error (radians)")
-        ax.set_ylabel("Density")
+    ax.hist(
+        posterior_error.ravel(),
+        bins=40,
+        density=True,
+        alpha=0.45,
+        label="Posterior predictive",
+    )
 
-        ax.tick_params(labelsize=TICK_SIZE)
-        ax.xaxis.label.set_size(LABEL_SIZE)
-        ax.yaxis.label.set_size(LABEL_SIZE)
+    ax.set_xlabel("Absolute error (radians)")
+    ax.set_ylabel("Density")
 
-        ax.grid(
-            alpha=0.35,
-            linestyle="--",
-            linewidth=0.5,
-        )
+    ax.tick_params(labelsize=TICK_SIZE)
+    ax.xaxis.label.set_size(LABEL_SIZE)
+    ax.yaxis.label.set_size(LABEL_SIZE)
 
-        ax.legend(
-            frameon=False,
-            fontsize=LEGEND_SIZE,
-            handlelength=1.8,
-        )
+    ax.legend(
+        frameon=False,
+        fontsize=LEGEND_SIZE,
+        handlelength=1.8,
+    )
 
-    fig.tight_layout(pad=0.5)
+    ax.grid(
+        alpha=0.35,
+        linestyle="--",
+        linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
 
     return fig
-
 
 
 def plot_setsize_posterior_predictive(
