@@ -7,7 +7,7 @@ authors:
 
 version: "1.0.0"
 
-repository-code: "https://github.com/your-username/working-memory-bayesian-model"
+repository-code: "https://github.com/erfanjaripour/hierarchical-bayesian-working-memory"
 
 license: "MIT"
 

@@ -6,7 +6,9 @@ This project investigates how memory load influences visual working memory preci
 
 The project applies Bayesian modeling to a publicly available visual working memory dataset originally reported by van den Berg et al. (2012). Three progressively flexible Bayesian models are evaluated: a null model, a hierarchical model with participant-level variability, and a nonlinear hierarchical model with set-size-specific effects.
 
-The results show that memory load is associated with systematic changes in precision and that the nonlinear hierarchical model provides the best predictive performance among the tested model formulations. Robustness analyses indicate that the main conclusions remain stable across alternative priors, sampling configurations, and initialization settings.
+The models are evaluated as alternative statistical descriptions of behavioral performance rather than competing cognitive theories of visual working memory. Model performance is compared using posterior predictive checks and out-of-sample predictive evaluation.
+
+The results show that memory load is associated with systematic changes in precision and that the nonlinear hierarchical model provides the best predictive performance among the tested model formulations. Robustness analyses indicate that the main conclusions remain stable across alternative priors, sampling configurations, initialization settings, and experiment-specific analyses.
 
 ## Research Question
 
@@ -43,7 +45,9 @@ The dataset contains trial-level continuous-report responses from three experime
 Experiments include:
 
 - Exp1: Color memory with scrolling response
+
 - Exp2: Orientation memory with rotation response
+
 - ExpS3: Color memory with color wheel response
 
 The repository uses the original dataset without modifying the experimental structure. All preprocessing steps are documented in the analysis workflow.
@@ -61,29 +65,35 @@ Memory performance is quantified using circular error, calculated as the angular
 Preprocessing includes:
 
 - validation of dataset structure,
-- handling missing values,
+
+- checking missing values and duplicated records,
+
 - circular error transformations,
+
 - participant and experiment indexing,
+
 - generation of analysis-ready datasets.
 
 All preprocessing and analysis steps are implemented in Python.
 
 ## Bayesian Modeling
 
-The analysis uses hierarchical Bayesian models with a Von Mises likelihood for circular error distributions.
+The analysis uses hierarchical Bayesian models with a von Mises likelihood for circular error distributions.
 
 Three models are evaluated:
 
 1. **Null model**
 
-A baseline model estimating participant-independent precision.
+A baseline model estimating participant-level precision without a memory-load effect.
 
 2. **Hierarchical model**
 
 A model estimating:
 
 - population-level precision,
+
 - memory-load effects,
+
 - participant-level variation through partial pooling.
 
 3. **Nonlinear hierarchical model**
@@ -95,17 +105,24 @@ Models are fitted using Hamiltonian Monte Carlo sampling with the No-U-Turn Samp
 Model evaluation includes:
 
 - posterior predictive checks,
+
 - convergence diagnostics,
+
 - effective sample size,
+
 - rank plots,
+
 - leave-one-out cross-validation.
 
 Robustness analyses examine:
 
 - prior sensitivity,
+
 - sampling sensitivity,
+
 - posterior stability,
-- participant influence.
+
+- experiment-specific effects.
 
 # Results Summary
 
@@ -117,7 +134,7 @@ Model comparison using leave-one-out cross-validation favored the nonlinear hier
 
 Posterior predictive checks showed that the selected model reproduced important characteristics of the observed error distributions.
 
-Robustness analyses showed highly similar parameter estimates across alternative priors, sampling configurations, and random seeds.
+Robustness analyses showed highly similar parameter estimates across alternative priors, sampling configurations, random seeds, and experiment-specific analyses.
 
 # Reproducibility
 
@@ -126,10 +143,15 @@ This project is fully reproducible using a Python scientific computing environme
 The complete workflow includes:
 
 1. Data preparation
+
 2. Exploratory analysis
+
 3. Bayesian model fitting
+
 4. Posterior analysis
+
 5. Model comparison
+
 6. Figure and table generation
 
 Detailed computational environment information, including software versions and dependencies, is provided in the repository environment files.
@@ -137,49 +159,78 @@ Detailed computational environment information, including software versions and 
 To reproduce the analysis:
 
 1. Clone this repository.
+
 2. Install the required Python environment.
+
 3. Download and place the dataset in the appropriate data directory.
-4. Execute the analysis scripts/notebooks in the documented order.
+
+4. Execute the analysis notebooks in the documented order.
 
 All generated figures, tables, and supplementary outputs can be reproduced from the analysis pipeline.
 
 # Repository Structure
 
-working-memory-bayesian-model/  
-│  
-├── data/  
-│   ├── processed/  
-│   ├── raw/  
-│  
-│  
-├── manuscript/  
-│   ├── paper-draft.md  
-│   ├── references.bib  
-│  
-│  
-├── notebooks/  
-│   ├── 01-data-inspection.ipynb  
-│   ├── 02-analysis.ipynb  
-│   ├── 03-modeling.ipynb  
-│  
-├── results/  
-│   ├── figures/  
-│   ├── tables/  
-│  
-│  
-├── src/  
-│   ├── \_\_init\_\_.py  
-│   ├── circular\_statistics.py  
-│   ├── data\_processing.py  
-│   ├── models.py  
-│   ├── visualization.py  
-│  
-│  
-├── .gitignore 
-├── CITATION.cff  
-├── environment.yml  
-├── LICENSE  
-└── README.md  
+hierarchical-bayesian-working-memory/
+
+│
+
+├── data/
+
+│   ├── processed/
+
+│   ├── raw/
+
+│
+
+├── manuscript/
+
+│   ├── manuscript.md
+
+│   ├── references.bib
+
+│
+
+├── notebooks/
+
+│   ├── 01-data-inspection.ipynb
+
+│   ├── 02-analysis.ipynb
+
+│   ├── 03-modeling.ipynb
+
+│
+
+├── results/
+
+│   ├── figures/
+
+│   ├── tables/
+
+│
+
+├── src/
+
+│   ├── __init__.py
+
+│   ├── circular_statistics.py
+
+│   ├── data_processing.py
+
+│   ├── models.py
+
+│   ├── visualization.py
+
+│
+
+├── .gitignore
+
+├── CITATION.cff
+
+├── environment.yml
+
+├── LICENSE
+
+└── README.md
 
 # Citation
 
@@ -198,4 +249,3 @@ This repository contains original analysis code and materials developed for this
 The original dataset is distributed according to the license specified by the BenchmarksWM repository.
 
 Code and manuscript materials are released under the repository license specified below.
-
