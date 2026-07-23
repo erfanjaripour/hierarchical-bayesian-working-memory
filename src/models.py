@@ -71,7 +71,7 @@ def build_hierarchical_model(
 
         sigma_alpha = pm.HalfNormal(
             "sigma_alpha",
-            sigma=sigma_alpha_sd,
+            sigma=1.0,
         )
 
         alpha_participant = pm.Normal(

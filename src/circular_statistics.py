@@ -1,6 +1,7 @@
 from typing import Any
 
 import pandas as pd
+import numpy as np
 
 from scipy.stats import circmean, circvar, circstd
 
@@ -49,8 +50,9 @@ def summarize_error_by_setsize(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def summarize_error_by_participant(df: pd.DataFrame) -> pd.DataFrame:
-    return (
-        df.groupby(["experiment", "id"])["errorrad"]
+
+    summary = (
+        df.groupby("id")["errorrad"]
         .agg(
             count="count",
             mean_error="mean",
@@ -58,8 +60,13 @@ def summarize_error_by_participant(df: pd.DataFrame) -> pd.DataFrame:
             std="std",
         )
         .reset_index()
+        .rename(columns={"id": "participant"})
     )
 
+    summary["se"] = summary["std"] / np.sqrt(summary["count"])
+    summary["ci95"] = 1.96 * summary["se"]
+
+    return summary
 
 def summarize_error_by_experiment(df: pd.DataFrame) -> pd.DataFrame:
     return (

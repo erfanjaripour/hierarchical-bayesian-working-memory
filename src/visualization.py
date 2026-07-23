@@ -259,36 +259,35 @@ def plot_error_by_setsize(
 
 
 
-def plot_participant_precision(summary):
+def plot_participant_mean_error(summary):
 
     fig, ax = plt.subplots(figsize=FIG_DOUBLE)
 
+    x = np.arange(1, len(summary) + 1)
+
     ax.errorbar(
-        summary["id"].astype(str),
+        x,
         summary["mean_error"],
-        yerr=summary["std"],
+        yerr=summary["ci95"],
         fmt="o",
         markersize=LINE_MARKER,
         capsize=3,
+        linewidth=1.2,
     )
 
-    ax.set_xlabel("Participant")
-    ax.set_ylabel("Mean error (radians)")
+    ax.set_xlabel("Participant (ordered)")
+    ax.set_ylabel("Mean angular error (radians)")
 
-    ax.tick_params(
-        axis="x",
-    )
+    ax.set_xlim(0.5, len(summary) + 0.5)
 
-    plt.setp(
-        ax.get_xticklabels(),
-        ha="right",
-    )
+    ax.set_xticks(x)
+    ax.set_xticklabels(x)
 
     ax.grid(
         axis="y",
         alpha=0.35,
-	linestyle="--",
-	linewidth=0.5,
+        linestyle="--",
+        linewidth=0.5,
     )
 
     fig.set_constrained_layout(True)
@@ -574,46 +573,44 @@ def plot_rank(
 
 # Model Validation
 
+def plot_participant_posterior(
+    summary,
+):
 
-def plot_participant_ppc(
-    observed,
-    predicted,
-) -> plt.Figure:
+    fig, ax = plt.subplots(figsize=FIG_DOUBLE)
 
-    fig, ax = plt.subplots(
-        figsize=FIG_SINGLE
+    summary = summary.sort_values("mean").reset_index(drop=True)
+
+    x = np.arange(len(summary))
+
+    ax.errorbar(
+        x,
+        summary["mean"],
+        yerr=[
+            summary["mean"] - summary["hdi_3%"],
+            summary["hdi_97%"] - summary["mean"],
+        ],
+        fmt="o",
+        markersize=LINE_MARKER,
+        capsize=3,
+        linewidth=1.4,
     )
 
-    ax.scatter(
-        observed,
-        predicted,
-        s=SCATTER_SIZE,
+    ax.set_xticks(x)
+
+    ax.set_xticklabels(
+        np.arange(1, len(summary) + 1),
     )
 
-    lims = [
-        min(observed + predicted),
-        max(observed + predicted),
-    ]
+    ax.set_xlabel("Participant")
 
-    ax.plot(
-        lims,
-        lims,
-        linestyle="--",
-        solid_capstyle="round",
-    )
-
-    ax.set_xlabel(
-        "Observed mean error"
-    )
-
-    ax.set_ylabel(
-        "Predicted mean error"
-    )
+    ax.set_ylabel("Baseline log precision")
 
     ax.grid(
+        axis="y",
         alpha=0.35,
-	linestyle="--",
-	linewidth=0.5,
+        linestyle="--",
+        linewidth=0.5,
     )
 
     fig.set_constrained_layout(True)
@@ -663,11 +660,67 @@ def plot_residuals(
 
 
 
+def plot_participant_ppc(
+    observed,
+    predicted,
+) -> plt.Figure:
+
+    observed = np.asarray(observed)
+    predicted = np.asarray(predicted)
+
+    fig, ax = plt.subplots(figsize=FIG_SINGLE)
+
+    ax.scatter(
+        observed,
+        predicted,
+        s=SCATTER_SIZE,
+        alpha=0.8,
+    )
+
+    lim_min = min(observed.min(), predicted.min())
+    lim_max = max(observed.max(), predicted.max())
+
+    padding = 0.03 * (lim_max - lim_min)
+
+    lim_min -= padding
+    lim_max += padding
+
+    ax.plot(
+        [lim_min, lim_max],
+        [lim_min, lim_max],
+        linestyle="--",
+        linewidth=1.5,
+    )
+
+    ax.set_xlim(lim_min, lim_max)
+    ax.set_ylim(lim_min, lim_max)
+
+    ax.set_aspect("equal", adjustable="box")
+
+    ax.set_xlabel("Observed mean error (radians)")
+    ax.set_ylabel("Posterior predictive mean\nerror (radians)")
+
+    ax.tick_params(
+        axis="both",
+        labelsize=TICK_SIZE,
+    )
+
+    ax.grid(
+        alpha=0.35,
+        linestyle="--",
+        linewidth=0.5,
+    )
+
+    fig.set_constrained_layout(True)
+
+    return fig
+
+
 
 # Robustness Analysis
 
 
-def plot_participant_influence(
+def plot_participant_mean_error(
     participant_influence,
 ):
 
